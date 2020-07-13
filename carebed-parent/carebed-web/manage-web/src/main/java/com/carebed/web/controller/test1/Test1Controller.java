@@ -21,5 +21,6 @@ public class Test1Controller {
         int ae = 0;
         int asw = 0;
         int awq = 0;
+        System.out.println(a);
     }
 }
