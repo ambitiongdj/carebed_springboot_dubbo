@@ -12,5 +12,5 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class TestController {
 
-
+//测试拉取和获取
 }
