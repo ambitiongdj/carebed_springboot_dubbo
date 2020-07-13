@@ -1,0 +1,138 @@
+# 开发环境配置
+server:
+  # 服务器的HTTP端口，默认为80
+  port: 9001
+  servlet:
+    # 应用的访问路径
+    context-path: /
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # tomcat最大线程数，默认为200
+    max-threads: 800
+    # Tomcat启动初始化的线程数，默认值25
+    min-spare-threads: 30
+
+#dubbo配置
+dubbo:
+  application:
+    name: system-service
+    qos-enable: true
+    qos-port: 33333
+    qos-accept-foreign-ip: false
+  registry:
+    protocol: zookeeper
+    address: 127.0.0.1:2181
+  protocol:
+    port: 20880
+  provider:
+    loadbalance: roundrobin
+    timeout: 60000
+
+# 日志配置
+logging:
+  level:
+    com.carebed: debug
+    org.springframework: warn
+
+# Spring配置
+spring:
+  # 服务模块
+  devtools:
+    restart:
+      # 热部署开关
+      enabled: false
+  redis:
+    cluster:
+      enabled: false
+    host: 127.0.0.1 #redis的ip地址
+    port: 6379 #端口号
+    database: 1 #数据库，默认为0
+    timeout: 2000 #客户端超时时间单位是毫秒 默认是2000
+  main:
+    allow-bean-definition-overriding: true
+  shardingsphere:
+    datasource:
+      #数据源名称，多数据源以逗号分隔
+      names: carebed-master,carebed-salve
+      # 主数据源
+      carebed-master:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://10.0.20.57:3306/carebed?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&allowMultiQueries=true&serverTimezone=GMT%2B8
+        username: dev
+        password: dev1234
+        # 初始连接数
+        initialSize: 10
+        # 最小连接池数量
+        minIdle: 1
+        # 最大连接池数量
+        maxActive: 300
+        # 配置获取连接等待超时的时间
+        maxWait: 60000
+        # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+        timeBetweenEvictionRunsMillis: 60000
+        # 配置一个连接在池中最小生存的时间，单位是毫秒
+        minEvictableIdleTimeMillis: 300000
+        # 配置一个连接在池中最大生存的时间，单位是毫秒
+        maxEvictableIdleTimeMillis: 900000
+        # 配置检测连接是否有效
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+      # 从数据源
+      carebed-salve:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://10.0.20.57:3306/carebed?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&allowMultiQueries=true&serverTimezone=GMT%2B8
+        username: dev
+        password: dev1234
+        # 初始连接数
+        initialSize: 10
+        # 最小连接池数量
+        minIdle: 1
+        # 最大连接池数量
+        maxActive: 300
+        # 配置获取连接等待超时的时间
+        maxWait: 60000
+        # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+        timeBetweenEvictionRunsMillis: 60000
+        # 配置一个连接在池中最小生存的时间，单位是毫秒
+        minEvictableIdleTimeMillis: 300000
+        # 配置一个连接在池中最大生存的时间，单位是毫秒
+        maxEvictableIdleTimeMillis: 900000
+        # 配置检测连接是否有效
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+    masterslave:
+      # 读写分离配置  ROUND_ROBIN(轮询)，RANDOM（随机）
+      load-balance-algorithm-type: round_robin
+      # 最终的数据源名称
+      name: dataSource
+      # 主库数据源名称
+      master-data-source-name: carebed-master
+      # 从库数据源名称列表，多个逗号分隔
+      slave-data-source-names: carebed-salve
+    props:
+      # 开启SQL显示，默认false
+      sql:
+        show: true
+# MyBatis
+mybatis:
+    # 搜索指定包别名
+    typeAliasesPackage: com.carebed.**.entity
+    # 配置mapper的扫描，找到所有的mapper.xml映射文件
+    mapperLocations: classpath*:mapper/**/*Mapper.xml
+    # 加载全局的配置文件
+    configLocation: classpath:mybatis-config.xml
+
+# PageHelper分页插件
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+#定时管理项目的URL
+job:
+  manage:
+    url: http://127.0.0.1:8002

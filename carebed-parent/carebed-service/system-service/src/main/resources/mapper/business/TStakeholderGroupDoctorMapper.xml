@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.carebed.business.mapper.TStakeholderGroupDoctorMapper">
+    
+    <resultMap type="TStakeholderGroupDoctor" id="TStakeholderGroupDoctorResult">
+        <result property="id"    column="id"    />
+        <result property="doctorId"    column="doctor_id"    />
+        <result property="stakeholderGroupId"    column="stakeholder_group_id"    />
+        <result property="shareProportion"    column="share_proportion"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectTStakeholderGroupDoctorVo">
+        select id, doctor_id, stakeholder_group_id, share_proportion, create_time from t_stakeholder_group_doctor
+    </sql>
+
+    <select id="selectTStakeholderGroupDoctorList" parameterType="TStakeholderGroupDoctor" resultMap="TStakeholderGroupDoctorResult">
+        <include refid="selectTStakeholderGroupDoctorVo"/>
+        <where>  
+            <if test="doctorId != null "> and doctor_id = #{doctorId}</if>
+            <if test="stakeholderGroupId != null "> and stakeholder_group_id = #{stakeholderGroupId}</if>
+            <if test="shareProportion != null "> and share_proportion = #{shareProportion}</if>
+        </where>
+    </select>
+    
+    <select id="selectTStakeholderGroupDoctorById" parameterType="Long" resultMap="TStakeholderGroupDoctorResult">
+        <include refid="selectTStakeholderGroupDoctorVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertTStakeholderGroupDoctor" parameterType="TStakeholderGroupDoctor">
+        insert into t_stakeholder_group_doctor
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null ">id,</if>
+            <if test="doctorId != null ">doctor_id,</if>
+            <if test="stakeholderGroupId != null ">stakeholder_group_id,</if>
+            <if test="shareProportion != null ">share_proportion,</if>
+            <if test="createTime != null ">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null ">#{id},</if>
+            <if test="doctorId != null ">#{doctorId},</if>
+            <if test="stakeholderGroupId != null ">#{stakeholderGroupId},</if>
+            <if test="shareProportion != null ">#{shareProportion},</if>
+            <if test="createTime != null ">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTStakeholderGroupDoctor" parameterType="TStakeholderGroupDoctor">
+        update t_stakeholder_group_doctor
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="doctorId != null ">doctor_id = #{doctorId},</if>
+            <if test="stakeholderGroupId != null ">stakeholder_group_id = #{stakeholderGroupId},</if>
+            <if test="shareProportion != null ">share_proportion = #{shareProportion},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTStakeholderGroupDoctorById" parameterType="Long">
+        delete from t_stakeholder_group_doctor where id = #{id}
+    </delete>
+
+    <delete id="deleteTStakeholderGroupDoctorByIds" parameterType="String">
+        delete from t_stakeholder_group_doctor where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteSGDBySGIds" parameterType="String">
+        delete from t_stakeholder_group_doctor where stakeholder_group_id in
+        <foreach item="sgid" collection="array" open="(" separator="," close=")">
+            #{sgid}
+        </foreach>
+    </delete>
+
+    <select id="findSGDByDoctorIds" parameterType="String" resultType="int">
+        select count(id) from t_stakeholder_group_doctor where doctor_id in
+        <foreach item="doctorId" collection="array" open="(" separator="," close=")">
+            #{doctorId}
+        </foreach>
+    </select>
+
+    <insert id="insertTStakeholderGroupDoctorBatch" parameterType="TStakeholderGroupDoctor">
+        insert into t_stakeholder_group_doctor
+            (doctor_id, stakeholder_group_id, create_time)
+        values
+        <foreach item="doctorId" collection="params.doctorIdArray" open="" separator="," close="">
+            (#{doctorId},#{stakeholderGroupId},#{createTime})
+        </foreach>
+    </insert>
+
+    <delete id="deleteTStakeholderGroup" parameterType="TStakeholderGroupDoctor">
+        delete from t_stakeholder_group_doctor where stakeholder_group_id = #{stakeholderGroupId} and doctor_id = #{doctorId}
+    </delete>
+
+    <delete id="deleteTStakeholderGroupBatch" parameterType="map">
+        delete from t_stakeholder_group_doctor where stakeholder_group_id = #{stakeholderGroupId}
+        and doctor_id in
+        <foreach item="doctorId" collection="doctorIds.split(',')" open="(" separator="," close=")">
+            #{doctorId}
+        </foreach>
+    </delete>
+</mapper>

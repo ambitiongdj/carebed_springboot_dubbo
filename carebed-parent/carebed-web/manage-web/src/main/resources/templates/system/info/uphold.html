@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('设备编号列表')" />
+    <style type="text/css">
+        .col-div{
+            padding-top: 5px
+        }
+        .col-top {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <form id="formId">
+            <input name="deptId" type="hidden" id="treeId" th:value="*{deptId}"/>
+            <input name="deptCode" type="hidden" id="treeDeptCode"/>
+            <div class="select-list">
+                <div class="col-sm-12 col-top col-sm-offset-1">
+                    <label class="col-sm-2 col-div control-label">归属机构：</label>
+                    <div class="col-sm-6">
+                        <input name="deptName" onclick="selectDeptTree()" id="treeName" type="text" placeholder="请选择归属部门" class="form-control" autocomplete="off">
+                    </div>
+                </div>
+                <div class=" col-sm-10 select-table table-striped">
+                    <table id="bootstrap-table"></table>
+                </div>
+                <div class="col-sm-12 col-top col-sm-offset-1" style="padding-bottom: 10px">
+                    <label class="col-sm-2 col-div control-label">设备编号：</label>
+                    <div class="col-sm-6">
+                        <input id="equipmentNumber" name="equipmentNumber" class="form-control" type="text">
+                    </div>
+                    <a class="btn btn-primary btn-rounded btn-sm" onclick="submitHandler()" shiro:hasPermission="system:info:add"><i class="fa fa-plus"></i> 添加</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('system:info:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('system:info:remove')}]];
+    var prefix = ctx + "system/info";
+
+    $(function() {
+        var options = {
+            url: prefix + "/uphold",
+            createUrl: prefix + "/add",
+            removeUrl: prefix + "/remove",
+            modalName: "设备编号",
+            showSearch: false,
+            showRefresh: false,
+            showColumns: false,
+            showToggle: false,
+            columns: [
+                {
+                    field: 'equipmentNumber',
+                    title: 'pos机器的设备编号'
+                },{
+                    field: 'deptCode',
+                    title: '机构编号'
+                },{
+                    field: 'deptName',
+                    title: '机构名称'
+                },{
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.equipmentId + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#formId").validate({
+            rules: {
+                deptName: "required",
+                equipmentNumber: "required",
+                deptName: {
+                    required: true,
+                },
+                equipmentNumber: {
+                    required: true,
+                    remote: {
+                        url: prefix + "/infoByEquipmentNumber",
+                        type: "post",
+                        dataType: "json",
+                        data: {
+                            "deptCode": function () {
+                                return $('#treeDeptCode').val();
+                            }
+                        }
+                    }
+                },
+            },
+            messages: {
+                deptName: icon + "请选择部门",
+                equipmentNumber: icon + "请输入设备编号",
+                deptName: {
+                    required: icon + "请选择部门",
+                },
+                equipmentNumber: {
+                    required: icon + "请输入设备编号",
+                    remote: icon + "该设备编号已经存在，请勿重复添加！",
+                },
+            }
+        });
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            var config = {
+                url: prefix + "/add",
+                type: "post",
+                dataType: "json",
+                data: $('#formId').serialize(),
+                success: function(result) {
+                    $("#equipmentNumber").val("");
+                    $.table.refresh();
+                }
+            };
+            $.ajax(config)
+        }
+    }
+
+    /*设备编号维护-选择部门树*/
+    function selectDeptTree() {
+        var treeId = $("#treeId").val();
+        var deptId = $.common.isEmpty(treeId) ? "100" : $("#treeId").val();
+        var url = ctx + "system/dept/selectDeptTree/" + deptId;
+        var options = {
+            title: '设备编号维护',
+            width: "450",
+            url: url,
+            callBack: doSubmit
+        };
+        $.modal.openOptions(options);
+    }
+    function doSubmit(index, layero){
+        var tree = layero.find("iframe")[0].contentWindow.$._tree;
+        var body = layer.getChildFrame('body', index);
+        $("#treeId").val(body.find('#treeId').val());
+        $("#treeName").val(body.find('#treeName').val());
+        $("#treeDeptCode").val(body.find('#treeDeptCode').val());
+        layer.close(index);
+
+        if ("" != $("#treeDeptCode").val()) {
+            $("#formId").validate().element($("#treeName"));
+            $.table.search()
+        }
+    }
+</script>
+</body>
+</html>

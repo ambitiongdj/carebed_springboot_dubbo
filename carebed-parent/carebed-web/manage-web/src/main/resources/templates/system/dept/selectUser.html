@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('分配角色选择用户')" />
+</head>
+
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="role-form">
+				    <input type="hidden" id="deptCode" name="params[deptCode]" th:value="${deptCode}">
+					<div class="select-list">
+						<ul>
+							<li>
+								机构编码：<input type="text" name="deptCode"/>
+							</li>
+							<li>
+								员工姓名：<input type="text" name="userName"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+	        
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table" class="table text-nowrap"></table>
+			</div>
+		</div>
+	</div>
+	<th:block th:include="include :: footer" />
+	<script th:inline="javascript">
+		var prefix = ctx + "system/dept/changeUser";
+
+		$(function() {
+			var options = {
+		        url: prefix + "/canChangeUserList",
+		        sortName: "createTime",
+		        sortOrder: "desc",
+		        modalName: "用户",
+		        showSearch: false,
+		        showRefresh: false,
+		        showToggle: false,
+		        showColumns: false,
+		        clickToSelect: true,
+		        rememberSelected: true,
+		        columns: [{
+		        	field: 'state',
+		            checkbox: true
+		        },
+		        {
+		            field: 'userId',
+		            title: '用户ID',
+		            visible: false
+		        },
+				{
+					field: 'deptCode',
+					title: '机构编码'
+				},
+				{
+					field: 'deptName',
+					title: '部门名称'
+				},
+				{
+					field: 'userName',
+					title: '员工名称'
+				},
+				{
+					title: '员工状态',
+					align: 'center',
+					formatter: function (value, row, index) {
+						return statusTools(row);
+					}
+				},
+				{
+					field: 'userCode',
+					title: '员工工号'
+				},
+				{
+					field: 'postName',
+					title: '岗位'
+				},
+				{
+					field: 'dictLabel',
+					title: '岗位职级',
+				},
+		        {
+		            field: 'entryDate',
+		            title: '入职日期',
+					formatter: function (value, row, index) {
+						if($.common.isNotEmpty(value)){
+							return $.common.formatDate(value,"YYYY-mm-dd");
+						}
+						return '-';
+					},
+		        }]
+		    };
+		    $.table.init(options);
+		});
+		
+		/* 用户状态显示 */
+		function statusTools(row) {
+			if (row.status == 0) {
+
+				return '<a class="btn  disabled" style="padding: 2px 6px; height:22px;font-size: 13px;background-color: #3e94de;color: #fff;"> 正式</a>'
+			}else if (row.status == 1) {
+
+				return '<a class="btn btn-danger  disabled" style="padding: 2px 6px; height:22px;font-size: 13px;"> 离职</a>'
+			} else if (row.status == 2){
+				return  '<a class="btn disabled" style="padding: 2px 6px; height:22px;font-size: 13px; background-color: #f8ac59;color: #fff;"> 试用 </a>'
+			}
+		}
+
+		/* 添加用户-选择用户-提交 */
+		function submitHandler() {
+			var rows = $.table.selectFirstColumns();
+			if (rows.length == 0) {
+       			$.modal.alertWarning("请至少选择一条记录");
+       			return;
+       		}
+			var data = { "deptCode": $("#deptCode").val(), "userIds": rows.join() };
+			$.operate.save(prefix + "/belongDept", data);
+		}
+	</script>
+</body>
+</html>

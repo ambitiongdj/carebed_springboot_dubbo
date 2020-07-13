@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('迁移用户')" />
+</head>
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="role-form">
+					<input id="treeId" name="parentId" type="hidden" th:value="${dept.deptId}"   />
+					<input id="deptCode" name="params[deptCode]" type="hidden" th:value="${dept.deptCode}"   />
+					<div class="select-list">
+						<ul>
+							<li>
+								部门：<input type="text" th:value="${dept.deptName}" readonly/>
+								<!--<input class="form-control" type="text" id="treeName" onclick="selectDeptTree()" readonly="true" th:value="${dept.deptName}">
+								<span class="input-group-addon"><i class="fa fa-search"></i></span>-->
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+	        
+	        <div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="selectUser()" shiro:hasPermission="system:dept:add">
+	                <i class="fa fa-plus"></i> 添加用户
+	            </a>
+		        <a class="btn btn-warning" onclick="closeItem()">
+		            <i class="fa fa-reply-all"></i> 关闭
+		        </a>
+	        </div>
+	        
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table"></table>
+			</div>
+		</div>
+	</div>
+	<th:block th:include="include :: footer" />
+	<script th:inline="javascript">
+		var datas = [[${@dict.getType('sys_normal_disable')}]];
+		var prefix = ctx + "system/dept/changeUser/";
+
+		/*部门管理-新增-选择父部门树*/
+		function selectDeptTree() {
+			var options = {
+				title: '部门选择',
+				width: "380",
+				url: prefix + "/selectDeptTree/" + $("#treeId").val(),
+				callBack: doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+
+		function doSubmit(index, layero){
+			var body = layer.getChildFrame('body', index);
+			$("#treeId").val(body.find('#treeId').val());
+			$("#treeName").val(body.find('#treeName').val());
+			layer.close(index);
+		}
+		/*部门管理-新增-选择父部门树*/
+
+		$(function() {
+			var options = {
+		        url: prefix + "/existUserList",
+		        sortName: "createTime",
+		        sortOrder: "desc",
+		        modalName: "用户",
+		        columns: [{
+					title: "序号",
+					formatter: function (value, row, index) {
+						return $.table.serialNumber(index);
+					},
+				},
+				{
+					field: 'deptCode',
+					title: '机构编码'
+				},
+				{
+					field: 'deptName',
+					title: '部门名称'
+				},
+				{
+					field: 'userName',
+					title: '员工名称'
+				},
+				{
+					title: '员工状态',
+					align: 'center',
+					formatter: function (value, row, index) {
+						return statusTools(row);
+					}
+				},
+				{
+					field: 'userCode',
+					title: '员工工号'
+				},
+				{
+					field: 'postName',
+					title: '岗位'
+				},
+				{
+					field: 'dictLabel',
+					title: '岗位职级',
+				},
+		        {
+		            field: 'entryDate',
+		            title: '入职日期',
+					formatter: function (value, row, index) {
+						if($.common.isNotEmpty(value)){
+							return $.common.formatDate(value,"YYYY-mm-dd");
+						}
+						return '-';
+					},
+		        },
+				]
+		    };
+		    $.table.init(options);
+		});
+
+		/* 分配用户-选择用户 */
+		function selectUser() {
+			var url = prefix + '/selectUser/' + $("#deptCode").val();
+		    $.modal.open("选择用户", url);
+		}
+
+		/* 用户状态显示 */
+		function statusTools(row) {
+			if (row.status == 0) {
+
+				return '<a class="btn  disabled" style="padding: 2px 6px; height:22px;font-size: 13px;background-color: #3e94de;color: #fff;"> 正式</a>'
+			}else if (row.status == 1) {
+
+				return '<a class="btn btn-danger  disabled" style="padding: 2px 6px; height:22px;font-size: 13px;"> 离职</a>'
+			} else if (row.status == 2){
+				return  '<a class="btn disabled" style="padding: 2px 6px; height:22px;font-size: 13px; background-color: #f8ac59;color: #fff;"> 试用 </a>'
+			}
+		}
+
+	</script>
+</body>
+</html>

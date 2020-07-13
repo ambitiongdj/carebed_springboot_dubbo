@@ -1,0 +1,41 @@
+# 开发环境配置
+server:
+  # 服务器的HTTP端口，默认为80
+  port: 8003
+  servlet:
+    # 应用的访问路径
+    context-path: /
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # tomcat最大线程数，默认为200
+    max-threads: 800
+    # Tomcat启动初始化的线程数，默认值25
+    min-spare-threads: 30
+
+dubbo:
+  application:
+    name: api-web
+  registry:
+    protocol: zookeeper
+    address: 127.0.0.1:2181
+  consumer:
+    loadbalance: roundrobin
+    check: false
+    timeout: 60000
+
+# 日志配置
+logging:
+  level:
+    com.carebed: debug
+    org.springframework: warn
+
+#redis
+spring:
+  redis:
+    cluster:
+      enabled: false
+    host: 127.0.0.1 #redis的ip地址
+    port: 6379 #端口号
+    database: 1 #数据库，默认为0
+    timeout: 2000 #客户端超时时间单位是毫秒 默认是2000

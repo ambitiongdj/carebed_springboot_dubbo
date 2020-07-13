@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.carebed.business.mapper.TProfitSharingMapper">
+    
+    <resultMap type="TProfitSharingVo" id="TProfitSharingResultVo">
+        <result property="id"    column="id"    />
+        <result property="doctorId"    column="doctor_id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="cotNo"    column="cot_no"    />
+        <result property="doctorId"    column="doctor_id"    />
+        <result property="rentalAmt"    column="rental_amt"    />
+        <result property="shareProportion"    column="share_proportion"    />
+        <result property="shareAmt"    column="share_amt"    />
+        <result property="leaseEndTime"    column="lease_end_time"    />
+        <result property="settleStatus"    column="settle_status"    />
+        <result property="doctorName"    column="doctor_name"    />
+        <result property="phone"    column="phone"    />
+        <result property="departmentTitle"    column="department_title"    />
+        <result property="hospitalName"    column="hospital_name"    />
+    </resultMap>
+
+    <select id="selectTProfitSharingList" parameterType="TProfitSharingVo" resultMap="TProfitSharingResultVo">
+        select tps.id,tps.order_no,tps.cot_no,td.doctor_name,td.phone,CONCAT(td.department,td.title,'')department_title,td.hospital_name,tps.rental_amt,tps.share_proportion,tps.share_amt,tps.lease_end_time from t_profit_sharing tps left join t_doctor td on tps.doctor_id=td.id
+        <where>  
+            <if test="orderNo != null  and orderNo != ''"> and tps.order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="cotNo != null  and cotNo != ''"> and tps.cot_no like concat('%', #{cotNo}, '%')</if>
+             <if test="doctorName != null  and doctorName != ''"> and td.doctor_name like concat('%', #{doctorName}, '%')</if>
+            <if test="phone != null  and phone != ''"> and td.phone like concat('%', #{phone}, '%')</if>
+            <if test="startTime != null "> and lease_end_time &gt;= #{startTime}</if>
+            <if test="endTime != null "> and lease_end_time &lt;= #{endTime}</if>
+             <if test="doctorId != null "> and tps.doctor_id = #{doctorId}</if>
+            <if test="checkBoxIds != null and checkBoxIds != ''">
+				AND tps.id in
+		 		<foreach item="profitId" collection="checkBoxIds.split(',')" open="(" separator="," close=")">
+	            	#{profitId}
+	        	</foreach>
+			</if>
+        </where>
+    </select>
+    
+    <select id="getMoneySum" parameterType="TProfitSharingVo" resultType="map">
+        select  sum(rental_amt) rentalAmtMoney,sum(share_amt) shareAmtMoney from t_profit_sharing tps left join t_doctor td on tps.doctor_id=td.id
+        <where>  
+            <if test="orderNo != null  and orderNo != ''"> and tps.order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="cotNo != null  and cotNo != ''"> and tps.cot_no like concat('%', #{cotNo}, '%')</if>
+             <if test="doctorName != null  and doctorName != ''"> and td.doctor_name like concat('%', #{doctorName}, '%')</if>
+            <if test="phone != null  and phone != ''"> and td.phone like concat('%', #{phone}, '%')</if>
+            <if test="startTime != null "> and lease_end_time &gt;= #{startTime}</if>
+            <if test="endTime != null "> and lease_end_time &lt;= #{endTime}</if>
+            <if test="doctorId != null "> and tps.doctor_id = #{doctorId}</if>
+            <if test="hospitalName != null  and hospitalName != ''"> and td.hospital_name like concat('%', #{hospitalName}, '%')</if>
+        </where>
+    </select>
+        <resultMap type="TProfitSharingCensusVo" id="TProfitSharingResultCensusVo">
+        <result property="id"    column="id"    />
+        <result property="doctorId"    column="doctor_id"    />
+        <result property="doctorId"    column="doctor_id"    />
+        <result property="rentalAmt"    column="rental_amt"    />
+        <result property="shareProportion"    column="share_proportion"    />
+        <result property="shareAmt"    column="share_amt"    />
+        <result property="leaseEndTime"    column="lease_end_time"    />
+        <result property="settleStatus"    column="settle_status"    />
+        <result property="doctorName"    column="doctor_name"    />
+        <result property="phone"    column="phone"    />
+        <result property="departmentTitle"    column="department_title"    />
+        <result property="hospitalName"    column="hospital_name"    />
+    </resultMap>
+    <select id="selectTProfitSharingCensusList" parameterType="TProfitSharingCensusVo" resultMap="TProfitSharingResultCensusVo">
+    	select tps.rental_amt,tps.share_amt,tps.doctor_id,td.doctor_name,td.phone,CONCAT(td.department,td.title,'')department_title,td.hospital_name from (
+			(select sum(rental_amt) rental_amt, sum(share_amt) share_amt,doctor_id from t_profit_sharing   
+			<where>  
+		          <if test="startTime != null "> and lease_end_time &gt;= #{startTime}</if>
+		          <if test="endTime != null "> and lease_end_time &lt;= #{endTime}</if>
+		    </where>
+				 group by doctor_id) tps
+				left join t_doctor td on tps.doctor_id=td.id
+			)
+		<where>  
+            <if test="doctorName != null  and doctorName != ''"> and td.doctor_name like concat('%', #{doctorName}, '%')</if>
+            <if test="hospitalName != null  and hospitalName != ''"> and td.hospital_name like concat('%', #{hospitalName}, '%')</if>
+            <if test="phone != null  and phone != ''"> and td.phone like concat('%', #{phone}, '%')</if>
+            <if test="checkBoxIds != null and checkBoxIds != ''">
+				AND doctor_id in
+		 		<foreach item="doctorId" collection="checkBoxIds.split(',')" open="(" separator="," close=")">
+	            	#{doctorId}
+	        	</foreach>
+			</if>
+        </where>
+    	
+        
+    </select>
+    
+</mapper>

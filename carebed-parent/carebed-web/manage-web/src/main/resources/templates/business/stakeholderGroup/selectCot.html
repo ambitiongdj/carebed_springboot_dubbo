@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('分配干系组选择陪护床')" />
+</head>
+
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="cot-form">
+					<input type="hidden" id="sgId" name="params[sgId]" th:value="${stakeholderGroup.id}">
+					<div class="select-list">
+						<ul>
+							<li>
+								<label style="width:auto">陪护床号：</label>
+								<input type="text" placeholder="床号起始" name="params[cotNoStart]"/>
+								<span>-</span>
+								<input type="text" placeholder="床号终止" name="params[cotNoEnd]"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+	        
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table" class="table text-nowrap"></table>
+			</div>
+		</div>
+	</div>
+	<th:block th:include="include :: footer" />
+	<script th:inline="javascript">
+		var prefix = ctx + "business/stakeholderGroup";
+
+		$(function() {
+			var options = {
+		        url: prefix + "/unBoundSGCot",
+		        queryParams: queryParams,
+		        showSearch: false,
+		        showRefresh: false,
+		        showToggle: false,
+		        showColumns: false,
+		        clickToSelect: true,
+		        rememberSelected: true,
+				modalName: "陪护床",
+				columns: [{
+					checkbox: true
+				},
+				{
+					field: 'cotId',
+					title: 'cotId',
+					switchable : false,
+					visible: false
+				},
+				{
+					title: "序号",
+					visible: true,
+					formatter: function (value, row, index) {
+						return $.table.serialNumber(index);
+					}
+				},
+				{
+					field: 'cotNo',
+					title: '陪护床号'
+				},
+				{
+					field: 'cotStatusName',
+					title: '状态',
+				}]
+			};
+		    $.table.init(options);
+		});
+		
+		function queryParams(params) {
+			var search = $.table.queryParams(params);
+			search.params = {"sgId": $("#sgId").val()};
+			return search;
+		}
+		
+		/* 添加-选择陪护床-提交 */
+		function submitHandler() {
+			var rows = $.table.selectFirstColumns();
+			if (rows.length == 0) {
+       			$.modal.alertWarning("请至少选择一条记录");
+       			return;
+       		}
+			var data = { "sgId": $("#sgId").val(), "cotIds": rows.join() };
+			$.operate.save(prefix + "/needBindingCotAll", data);
+		}
+	</script>
+</body>
+</html>

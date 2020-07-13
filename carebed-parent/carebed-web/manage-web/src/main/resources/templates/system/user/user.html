@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('用户列表')" />
+</head>
+<body class="gray-bg">
+	<div class="ui-layout-center">
+		<div class="container-div">
+			<div class="row">
+				<div class="col-sm-12 search-collapse">
+					<form id="user-form">
+						<div class="select-list">
+							<ul>
+								<li>
+									用户名称：<input type="text" name="userName" />
+								</li>
+								 <li>
+									手机号码：<input type="text" name="phonenumber"  />
+								</li>
+								<li>
+									身份证号：<input type="text" name="userCardCode" />
+								</li>
+								<li>
+									<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+								    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+								</li>
+							</ul>
+						</div>
+					</form>
+				</div>
+				
+		        <div class="btn-group-sm" id="toolbar" role="group">
+		            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:user:add">
+	                	<i class="fa fa-plus"></i> 新增
+	            	</a>
+		             <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="system:user:edit">
+			            <i class="fa fa-edit"></i> 修改
+			        </a>
+		            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="system:user:remove">
+		                <i class="fa fa-remove"></i> 删除
+		            </a>
+		        </div>
+		        
+		        <div class="col-sm-12 select-table table-striped">
+			    	<table id="bootstrap-table"></table>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<th:block th:include="include :: footer" />
+	<script th:inline="javascript">
+		 
+		var resetPwdFlag = [[${@permission.hasPermi('system:user:resetPwd')}]];
+		var prefix = ctx + "system/user";
+		$(function() {
+		    var options = {
+		        url: prefix + "/list",
+		        createUrl: prefix + "/add",
+		        updateUrl: prefix + "/edit/{id}",
+		        removeUrl: prefix + "/remove",
+		        sortName: "userId",
+		        modalName: "用户",
+		        columns: [{
+		            checkbox: true
+		        },
+		        {
+		            field: 'userId',
+		            title: 'userId',
+		            switchable : false,
+		            visible: false
+		        },
+		        {
+		            title: "序号",
+		            visible: true,
+		            formatter: function (value, row, index) {
+		                return $.table.serialNumber(index);
+		            }
+		        },
+		       
+		        {
+		            field: 'userName',
+		            title: '用户名称'
+		        },
+		        {
+		            field: 'phonenumber',
+		            title: '手机号'
+		        },
+		        {
+		            field: 'userCardCode',
+		            title: '身份证号'
+		        },
+		        {
+		            field: 'postName',
+		            title: '岗位'
+		        },
+		        {
+		        	title: '用户状态',
+		        	align: 'center',
+		        	formatter: function (value, row, index) {
+		        		return statusTools(row);
+		        	}
+		        },
+		         {
+		            field: 'createTime',
+		            title: '创建时间',
+		        	formatter: function (value, row, index) {
+		        		if(row.createTime!=null&&(row.createTime).length>0){
+		        			return $.common.formatDate(value,"YYYY-mm-dd");
+		        		}else{
+		        			return "--";
+		        		}
+		        	},
+		        	visible: true
+		        },
+		         
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		                var actions = [];
+		                actions.push('<a class="btn btn-success btn-xs ' + resetPwdFlag + '" href="javascript:void(0)" onclick="resetPwd(\'' + row.userId + '\')"><i class="fa fa-edit"></i>重置密码</a> ');
+		               	 return actions.join('');
+		            }
+		        }]
+		    };
+		    $.table.init(options);
+		});
+		
+		/* 用户管理-重置密码 */
+		function resetPwd(userId) {
+		    var url = prefix + '/resetPwd/' + userId;
+		    $.modal.open("重置密码", url, '800', '300');
+		}
+		/* 用户状态显示 */
+		function statusTools(row) {
+			
+		    if (row.status == 1) {
+		    	return '<a class="btn btn-danger  disabled" style="padding: 2px 6px; height:22px;font-size: 13px;">注销</a>'
+    		}else if (row.status == 0) {
+    			 return '<a class="btn  disabled" style="padding: 2px 6px; height:22px;font-size: 13px;background-color: #3e94de;color: #fff;">正常</a>'
+    		}  
+		}
+ 
+	</script>
+</body>
+</html>

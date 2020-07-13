@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html  lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--360浏览器优先以webkit内核解析-->
+    <title>中科元康介绍</title>
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="../static/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="../static/css/main/animate.min.css" th:href="@{/css/main/animate.min.css}" rel="stylesheet"/>
+    <link href="../static/css/main/style.min862f.css" th:href="@{/css/main/style.min862f.css}" rel="stylesheet"/>
+</head>
+
+<body class="gray-bg">
+    <div class="row  border-bottom white-bg dashboard-header">
+        <div class="col-sm-12">
+            <blockquote class="text-warning" style="font-size:14px">
+                                           中科元康官网
+                <br><a target="_blank" href="http://zkyuankang.com">http://zkyuankang.com</a><br>
+                <!--<h4 class="text-danger"></h4>-->
+            </blockquote>
+
+            <hr>
+        </div>
+        <div class="col-sm-3">
+            <!--<h2>Hello,Guest</h2>
+            <small>移动设备访问请扫描以下二维码：</small>
+            <br>
+            <br>-->
+            <img th:src="@{/img/qr_code.jpg}" width="100%" style="max-width:264px;">
+            <br>
+        </div>
+        <div class="col-sm-5">
+            <h2>中科元康 </h2>
+            <p>
+                中科元康智能科技股份有限公司成立于2018年，注册资金1亿元人民币，是一家以科技创新为核心驱动，致力于物联网、
+                智能科技、大数据、云计算等新技术应用等的创新型企业，旗下研发的智能机器人，智能售卖机，已进入多场景应用。
+                公司以智能科技引领智慧生活，打造民生工程，提升生态效能，全面推动全民健康，促进全民小康生活为奋斗理念。
+            </p>
+        </div>
+        <div class="col-sm-4">
+            <h4>产业结构：</h4>
+            <ol>
+                <li>智能养老机器人</li>
+                <li>智能公益馒头机</li>
+            </ol>
+        </div>
+
+    </div>
+
+
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
+    <script type="text/javascript">
+	    $('#pay-qrcode').click(function(){
+	        var html=$(this).html();
+	        parent.layer.open({
+	            title: false,
+	            type: 1,
+	            closeBtn:false,
+	            shadeClose:true,
+	            area: ['600px', 'auto'],
+	            content: html
+	        });
+	    });
+    </script>
+</body>
+</html>

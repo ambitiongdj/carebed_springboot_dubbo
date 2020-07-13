@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增医生')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-doctor-add">
+            <div class="row">
+            	<div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label is-required">医院名称：</label>
+                        <div class="col-sm-6">
+                            <input name="hospitalName" class="form-control" type="text" required>
+                        </div>
+                    </div>
+                </div>
+                
+             </div>
+            <div class="row">
+            	<div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">医生姓名：</label>
+                        <div class="col-sm-8">
+                            <input name="doctorName" class="form-control" type="text" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">身份证号：</label>
+                        <div class="col-sm-8">
+                             <input name="cardNo" id="cardNo" class="form-control" type="text" maxlength="18" required>
+                        </div>
+                    </div>
+                </div>
+             </div>
+  			 <div class="row">
+            	<div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">手机号：</label>
+                        <div class="col-sm-8">
+                            <input name="phone" id="phone" class="form-control" type="text" maxlength="11" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">科室：</label>
+                        <div class="col-sm-8">
+                             <input name="department" class="form-control" type="text"  required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      		<div class="row">
+            	<div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label  ">专业：</label>
+                        <div class="col-sm-8">
+                    		<input name="major" class="form-control" type="text">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">职称：</label>
+                        <div class="col-sm-8">
+                             <input name="title" class="form-control" type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="row">
+            	<div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">备注：</label>
+                        <div class="col-sm-6">
+                           <textarea id="remark" name="remark" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+             </div>
+             
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script type="text/javascript">
+        var prefix = ctx + "business/doctor"
+        $("#form-doctor-add").validate({
+        	onkeyup: false,
+        	rules:{
+        		
+        		cardNo:{
+        			isIdentity:true,
+                    remote: {
+                        url: prefix + "/checkDoctorUnique",
+                        type: "post",
+                        dataType: "json",
+                        data: {
+                            "cardNo": function () {
+                                return $.common.trim($("#cardNo").val());
+                            },"status":"1"
+                        },
+                        dataFilter: function (data, type) {
+                        	return $.validate.unique(data);
+                        }
+                    }
+        		},
+        		phone:{
+        			isPhone:true,
+                    remote: {
+                        url: prefix + "/checkDoctorUnique",
+                        type: "post",
+                        dataType: "json",
+                        data: {
+                            "phone": function () {
+                                return $.common.trim($("#phone").val());
+                            },"status":"1"
+                        },
+                        dataFilter: function (data, type) {
+                        	return $.validate.unique(data);
+                        }
+                    }
+        		},
+        	},
+        	messages: {
+                 
+        		 
+        		"phone":{
+                	remote: "手机号码已经存在"
+        		},
+        		"cardNo":{
+                	remote: "身份证号已经存在"
+        		}
+            },
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-doctor-add').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

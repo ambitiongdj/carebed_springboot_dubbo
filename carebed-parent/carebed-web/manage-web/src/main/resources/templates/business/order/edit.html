@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改订单')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-order-edit">
+            <input name="id" th:value="*{tOrder.id}" type="hidden">
+            <input name="wechatId" th:value="*{tOrder.wechatId}" class="form-control" type="hidden">
+            <h4 class="form-header h4">陪护床信息</h4>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">陪护床编号：</label>
+                <div class="col-sm-5">
+                    <span name="cotNo" th:text="*{tOrder.cotNo}" class="form-control"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">干系组编号：</label>
+                <div class="col-sm-5">
+                    <span name="stakeholderGroupId" th:text="*{tCot.stakeholderGroupId}" class="form-control"></span>
+                </div>
+            </div>
+            <h4 class="form-header h4">租用信息</h4>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">订单编号：</label>
+                    <div class="col-sm-5">
+                        <span name="orderNo" th:text="*{tOrder.orderNo}" class="form-control"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">订单状态：</label>
+                    <div class="col-sm-5">
+                        <span name="status" th:text="*{tOrder.status==00?'租用中':'已完成'}" class="form-control"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">租用开始时间：</label>
+                    <div class="col-sm-5">
+                        <div class="input-group date">
+                            <!--<span class="input-group-addon"><i class="fa fa-calendar"></i></span>-->
+                            <input name="leaseStartTime" th:value="${#dates.format(tOrder.leaseStartTime, 'yyyy-MM-dd')}" class="form-control" placeholder="yyyy-MM-dd" style="background-color:#ffffff" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">租用结束时间：</label>
+                    <div class="col-sm-5">
+                        <div class="input-group date">
+                            <!--<span class="input-group-addon"><i class="fa fa-calendar"></i></span>-->
+                            <input name="leaseEndTime" th:value="${#dates.format(tOrder.leaseEndTime, 'yyyy-MM-dd')}" class="form-control" placeholder="yyyy-MM-dd" style="background-color:#ffffff" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">租用耗时(小时)：</label>
+                    <div class="col-sm-5">
+                        <input name="rentalTime" th:value="*{tOrder.rentalTime}" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">租用费用(元)：</label>
+                    <div class="col-sm-5">
+                        <span name="rentalAmt" th:text="*{tOrder.rentalAmt}" class="form-control"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">租用押金：</label>
+                    <div class="col-sm-5">
+                        <span name="rentalDeposit" th:text="*{tOrder.rentalDeposit}" class="form-control"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">退回金额(元)：</label>
+                    <div class="col-sm-5">
+                        <span name="returnAmt" th:text="*{tOrder.returnAmt}" class="form-control"></span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-sm-offset-5 col-sm-10">
+        <button type="button" class="btn btn-danger" onclick="closeItem()">关 闭 </button>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <script type="text/javascript">
+        var prefix = ctx + "business/order";
+        $("#form-order-edit").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-order-edit').serialize());
+            }
+        }
+
+    </script>
+</body>
+</html>

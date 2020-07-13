@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<th:block th:include="include :: header('用户变更轨迹')" />
+<th:block th:include="include :: layout-latest-css" />
+<th:block th:include="include :: select2-css" />
+<th:block th:include="include :: ztree-css" />
+<style type="text/css">
+.colStyle {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+</style>
+</head>
+<body>
+	<div class="main-content">
+		<div class="container-div">
+			<div class="row">
+				<div class="col-sm-12 search-collapse">
+					<form id="user-form">
+						<input type="hidden" id="userId" name="userId"
+							th:value="${user.userId}">
+						<div class="select-list">
+							<ul>
+								<li>员工名称：<input type="text" name="userName"
+									style="width: 160px" />
+								</li>
+								<!--<li>手机号码：<input type="text" name="phonenumber"
+									style="width: 160px" />
+								</li>-->
+								<li>员工工号：<input type="text" name="userCode"
+									style="width: 160px" />
+								</li>
+
+								<li><a class="btn btn-primary btn-rounded btn-sm"
+									onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+									<a class="btn btn-warning btn-rounded btn-sm"
+									onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+								</li>
+							</ul>
+						</div>
+					</form>
+				</div>
+
+				<div class="btn-group-sm" id="toolbar" role="group">
+					<a class="btn btn-warning" onclick="$.table.exportExcel()"
+						shiro:hasPermission="system:user:export"> <i
+						class="fa fa-download"></i> 导出
+					</a>
+				</div>
+
+				<div class="col-sm-12 select-table table-striped">
+					<table id="bootstrap-table" style="table-layout: fixed;"></table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal inmodal fade" id="myModal2" tabindex="-1"
+		role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header" style="padding: 10px 15px;background-color: #e0eefe;">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">&times;</span><span class="sr-only">关闭</span>
+					</button>
+					<h4 class="modal-title" style="font-size: 17px;">变更内容</h4>
+				</div>
+				<div class="modal-body" style="line-height: 2;background-color: #ffffff;"></div>
+				<div class="modal-footer" style="padding: 8px;">
+					<button type="button" class="btn btn-sm btn-white"
+						data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: layout-latest-js" />
+	<th:block th:include="include :: select2-js" />
+	<th:block th:include="include :: ztree-js" />
+	<script th:inline="javascript">
+		$(function() {
+			var options = {
+				url : ctx + "system/trail/userTraillist",
+				exportUrl : ctx + "system/trail/export",
+				showSearch : false,
+				showRefresh : false,
+				showToggle : false,
+				showColumns : false,
+				clickToSelect : true,
+				sortName : "createTime",
+				sortOrder : "desc",
+				modalName : "用户轨迹",
+				columns : [ {
+					field : 'userName',
+					title : '员工名称'
+				}, {
+					field : 'userCode',
+					title : '员工工号'
+				}, /*{
+					field : 'phonenumber',
+					title : '手机号'
+				},*/ {
+					field : 'postName',
+					title : '岗位'
+				}, {
+					field : 'deptCode',
+					title : '机构编号'
+				}, {
+					field : 'trailRecord',
+					title : '用户足迹异动内容',
+					width : '200px',
+					class : 'colStyle',
+                   	cellStyle:{
+                        css:{"color":"#154896"}
+                    }
+				},
+				{
+					field : 'createName',
+					title : '操作人',
+				}, {
+					field : 'createTime',
+					title : '调动日期',
+					width : '170px',
+				} ],
+				 onClickCell: function (field, value, row, $element) {
+	                    if($.common.equals("trailRecord",field)){
+	                        var content = value.replace(/;/g, "</br>");
+	                        $(".modal-body").html(content);
+	                        $('#myModal2').modal('show');
+	                      
+	                    }
+	                }
+			};
+			$.table.init(options);
+		});
+	</script>
+</body>
+</html>

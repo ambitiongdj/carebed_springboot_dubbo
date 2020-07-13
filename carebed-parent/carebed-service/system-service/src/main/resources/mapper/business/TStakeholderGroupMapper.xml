@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.carebed.business.mapper.TStakeholderGroupMapper">
+    
+    <resultMap type="TStakeholderGroup" id="TStakeholderGroupResult">
+        <result property="id"    column="id"    />
+        <result property="groupName"    column="group_name"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <resultMap type="TStakeholderGroupVO" id="TStakeholderGroupVOResult">
+        <result property="id"    column="id"    />
+        <result property="groupName"    column="group_name"    />
+        <result property="bindingCotNum"    column="bindingCotNum"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectTStakeholderGroupVo">
+        select id, group_name, status, create_time, create_by, update_time, update_by, remark from t_stakeholder_group
+    </sql>
+
+    <select id="selectTStakeholderGroupList" parameterType="TStakeholderGroup" resultMap="TStakeholderGroupVOResult">
+        select
+            t.id,t.group_name,t.bindingCotNum,t.create_time
+        from
+            (
+                select
+                    tsg.id,tsg.group_name,tsg.create_time,count(tc.id) as bindingCotNum
+                from
+                    t_stakeholder_group tsg left join t_cot tc on tsg.id = tc.stakeholder_group_id
+                where
+                    tsg.`status` = '1'
+                    <if test="params.cotNo != null and params.cotNo != ''">
+                        and tsg.id in (select stakeholder_group_id from t_cot where cot_no like concat('%', #{params.cotNo}, '%'))
+                    </if>
+                group by tsg.id
+            ) t
+        left join t_stakeholder_group_doctor tsgd on t.id = tsgd.stakeholder_group_id
+        left join (select id,doctor_name from t_doctor where status = '1') td on tsgd.doctor_id = td.id
+        <where>
+            <if test="params.doctorName != null and params.doctorName != ''">
+                and td.doctor_name like concat('%', #{params.doctorName}, '%')
+            </if>
+        </where>
+        group by t.id
+        order by t.id desc
+    </select>
+    
+    <select id="selectTStakeholderGroupById" parameterType="Long" resultMap="TStakeholderGroupResult">
+        <include refid="selectTStakeholderGroupVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertTStakeholderGroup" parameterType="TStakeholderGroup">
+        insert into t_stakeholder_group
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null ">id,</if>
+            <if test="groupName != null  and groupName != ''">group_name,</if>
+            <if test="status != null  and status != ''">status,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="updateBy != null  and updateBy != ''">update_by,</if>
+            <if test="remark != null ">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null ">#{id},</if>
+            <if test="groupName != null  and groupName != ''">#{groupName},</if>
+            <if test="status != null  and status != ''">#{status},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="updateBy != null  and updateBy != ''">#{updateBy},</if>
+            <if test="remark != null ">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTStakeholderGroup" parameterType="TStakeholderGroup">
+        update t_stakeholder_group
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="groupName != null  and groupName != ''">group_name = #{groupName},</if>
+            <if test="status != null  and status != ''">status = #{status},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="updateBy != null  and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="remark != null ">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTStakeholderGroupById" parameterType="Long">
+        delete from t_stakeholder_group where id = #{id}
+    </delete>
+
+    <delete id="deleteTStakeholderGroupByIds" parameterType="String">
+        delete from t_stakeholder_group where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateBatchStatus" parameterType="map">
+        update t_stakeholder_group
+        set status = #{status} ,update_time = #{updateTime},update_by = #{updateBy}
+        where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="checkGroupNameUnique" parameterType="TStakeholderGroup" resultType="int">
+        select count(id) from t_stakeholder_group
+        <where>
+            <if test="id != null">and id != #{id}</if>
+            <if test="groupName != null  and groupName != ''">and group_name = #{groupName}</if>
+        </where>
+    </select>
+</mapper>

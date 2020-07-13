@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增陪护床')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-cot-add">
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">陪护床号：</label>
+                <div class="col-sm-8">
+                    <input name="cotNo" class="form-control" type="text" required>
+                </div>
+            </div>
+            <div class="form-group">
+				<label class="col-sm-3 control-label is-required">状态：</label>
+				<div class="col-sm-8">
+                   <select name="status" id="status" class="form-control minimumResultsForSearch" th:with="type=${@dict.getType('cot_status')}" required>
+                      <option value='' selected style='display:none;'>请选择</option>
+                      <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                   </select>
+				</div>
+			</div>
+            <div class="form-group">
+				<label class="col-sm-3 control-label">备注：</label>
+				<div class="col-sm-8">
+					<textarea id="remark" name="remark" class="form-control"></textarea>
+				</div>
+			</div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script type="text/javascript">
+        var prefix = ctx + "business/cot"
+        $("#form-cot-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-cot-add').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

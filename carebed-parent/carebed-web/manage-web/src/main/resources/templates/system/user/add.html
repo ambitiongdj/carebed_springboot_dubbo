@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增用户')" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-users-add">
+			 <div class="form-group">
+				<label class="col-sm-3 control-label is-required">用户名称：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="userName" id="userName" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label is-required">身份证号：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="userCardCode" id="userCardCode" required>
+				</div>
+			</div>
+        	<div class="form-group">
+				<label class="col-sm-3 control-label is-required">手机号码：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="phonenumber" id="phonenumber" required>
+				</div>
+			</div>
+        	<div class="form-group">
+				<label class="col-sm-3 control-label is-required">岗位名称：</label>
+				<div class="col-sm-8">
+					 <select id="postCode"  name="postCode" class="form-control" required>
+                        <option value="">请选择</option>
+						<option th:each="post:${posts}" th:value="${post.postCode} " th:text="${post.postName}" th:title="${post.postId}"></option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label is-required">岗位名称：</label>
+				<div class="col-sm-8">
+					<div class="radio">
+                        <label> <input type="radio"  name="status" value="0" checked> <i></i>正常</label>
+                        <label> <input type="radio"  name="status" value="1"> <i></i>注销</label>
+                    </div>
+				</div>
+			</div>
+			
+ 
+ 			<div class="form-group">
+				<label class="col-sm-3 control-label ">备注：</label>
+				<div class="col-sm-8">
+					<textarea name="remark" maxlength="500" class="form-control" rows="3"></textarea>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<script type="text/javascript">
+	  var prefix = ctx + "system/user";
+	    
+		$("#form-users-add").validate({
+			onkeyup: false,
+        	rules:{
+        		
+        		userCardCode:{
+        			isIdentity:true,
+                    remote: {
+                        url: prefix + "/checkUserCardCodeUnique",
+                        type: "post",
+                        dataType: "json",
+                        data: {
+                            "userCardCode": function () {
+                                return $.common.trim($("#userCardCode").val());
+                            }
+                        },
+                        dataFilter: function (data, type) {
+                        	return $.validate.unique(data);
+                        }
+                    }
+        		},
+        		phonenumber:{
+        			isPhone:true,
+                    remote: {
+                        url: prefix + "/checkPhoneUnique",
+                        type: "post",
+                        dataType: "json",
+                        data: {
+                            "phonenumber": function () {
+                                return $.common.trim($("#phonenumber").val());
+                            }
+                        },
+                        dataFilter: function (data, type) {
+                        	return $.validate.unique(data);
+                        }
+                    }
+        		},
+        	},
+        	messages: {
+                 
+        		 
+        		"phonenumber":{
+                	remote: "手机号码已经存在"
+        		},
+        		"userCardCode":{
+                	remote: "身份证号已经存在"
+        		}
+            },
+		    focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	var data = $("#form-users-add").serializeArray();
+	         
+	        	$.operate.save(prefix + "/add", data);
+	        }
+	    }
+	</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.carebed.business.mapper.TWechatUserMapper">
+    
+    <resultMap type="TWechatUser" id="TWechatUserResult">
+        <result property="id"    column="id"    />
+        <result property="memberId"    column="member_id"    />
+        <result property="openId"    column="open_id"    />
+        <result property="sex"    column="sex"    />
+        <result property="nick"    column="nick"    />
+        <result property="country"    column="country"    />
+        <result property="province"    column="province"    />
+        <result property="city"    column="city"    />
+        <result property="headImgUrl"    column="head_img_url"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectTWechatUserVo">
+        select id, member_id, open_id, sex, nick, country, province, city, head_img_url, create_time, update_time from t_wechat_user
+    </sql>
+
+    <select id="selectTWechatUserList" parameterType="TWechatUser" resultMap="TWechatUserResult">
+        <include refid="selectTWechatUserVo"/>
+        <where>  
+            <if test="memberId != null "> and member_id = #{memberId}</if>
+            <if test="openId != null  and openId != ''"> and open_id = #{openId}</if>
+            <if test="sex != null  and sex != ''"> and sex = #{sex}</if>
+            <if test="nick != null  and nick != ''"> and nick = #{nick}</if>
+            <if test="country != null  and country != ''"> and country = #{country}</if>
+            <if test="province != null  and province != ''"> and province = #{province}</if>
+            <if test="city != null  and city != ''"> and city = #{city}</if>
+            <if test="headImgUrl != null  and headImgUrl != ''"> and head_img_url = #{headImgUrl}</if>
+        </where>
+    </select>
+    
+    <select id="selectTWechatUserById" parameterType="Long" resultMap="TWechatUserResult">
+        <include refid="selectTWechatUserVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertTWechatUser" parameterType="TWechatUser" useGeneratedKeys="true" keyProperty="id">
+        insert into t_wechat_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="memberId != null ">member_id,</if>
+            <if test="openId != null  and openId != ''">open_id,</if>
+            <if test="sex != null  and sex != ''">sex,</if>
+            <if test="nick != null  and nick != ''">nick,</if>
+            <if test="country != null  and country != ''">country,</if>
+            <if test="province != null  and province != ''">province,</if>
+            <if test="city != null  and city != ''">city,</if>
+            <if test="headImgUrl != null  and headImgUrl != ''">head_img_url,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="updateTime != null ">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="memberId != null ">#{memberId},</if>
+            <if test="openId != null  and openId != ''">#{openId},</if>
+            <if test="sex != null  and sex != ''">#{sex},</if>
+            <if test="nick != null  and nick != ''">#{nick},</if>
+            <if test="country != null  and country != ''">#{country},</if>
+            <if test="province != null  and province != ''">#{province},</if>
+            <if test="city != null  and city != ''">#{city},</if>
+            <if test="headImgUrl != null  and headImgUrl != ''">#{headImgUrl},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTWechatUser" parameterType="TWechatUser">
+        update t_wechat_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="memberId != null ">member_id = #{memberId},</if>
+            <if test="openId != null  and openId != ''">open_id = #{openId},</if>
+            <if test="sex != null  and sex != ''">sex = #{sex},</if>
+            <if test="nick != null  and nick != ''">nick = #{nick},</if>
+            <if test="country != null  and country != ''">country = #{country},</if>
+            <if test="province != null  and province != ''">province = #{province},</if>
+            <if test="city != null  and city != ''">city = #{city},</if>
+            <if test="headImgUrl != null  and headImgUrl != ''">head_img_url = #{headImgUrl},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTWechatUserById" parameterType="Long">
+        delete from t_wechat_user where id = #{id}
+    </delete>
+
+    <delete id="deleteTWechatUserByIds" parameterType="String">
+        delete from t_wechat_user where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('陪护床列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                	<input type="hidden" id="checkBoxIds" name="checkBoxIds" >
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>陪护床号：</label>
+                                <input type="text" name="cotNo"/>
+                            </li>
+                  
+                            <li>
+                                <label>干系组名称：</label>
+                                <input type="text" name="groupName"/>
+                            </li>
+                            <li>
+								状态：<select name="status" th:with="type=${@dict.getType('cot_status')}">
+									<option value="">全部</option>
+									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+								</select>
+							</li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="business:cot:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="business:cot:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="removeall()" shiro:hasPermission="business:cot:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
+                 <a class="btn btn-primary" onclick="$.table.importExcel('importCot')" shiro:hasPermission="business:cot:import">
+                    <i class="fa fa-edit"></i> 导入
+                </a>
+                <a class="btn btn-warning" onclick="exportexcel()" shiro:hasPermission="business:cot:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('business:cot:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('business:cot:remove')}]];
+        var prefix = ctx + "business/cot";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                importUrl: prefix + "/importData",
+                modalName: "陪护床",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id', 
+                    title: '主键id',
+                    switchable : false,
+		            visible: false
+                },
+                {
+                    field: 'num', 
+                    title: '订单数',
+                    switchable : false,
+		            visible: false
+                },
+                {
+                    field: 'groupName', 
+                    title: '干系人组名',
+                    switchable : false,
+		            visible: false
+                },
+                {
+                    field: 'cotNo', 
+                    title: '陪护床号'
+                },
+                {
+                    field: 'status', 
+                    title: '状态',
+                    formatter: function (value, row, index) {
+                    	var status="";
+                    	if (row.status == "00") {
+                    		status="维护中";
+                		}else if (row.status =="01") {
+                			status="闲置中";
+                		}else if (row.status =="02") {
+                			status="使用中";
+                		}else if (row.status =="03") {
+                			status="保修中";
+                		}  else if (row.status =="04") {
+                			status="已作废";
+                		}
+		        		return status;
+		        	}
+                },
+                {
+                    field: 'memberName', 
+                    title: '会员姓名'
+                },
+                {
+                    field: 'groupName', 
+                    title: '干系人组名'
+                },
+		         {
+		            field: 'createTime',
+		            title: '添加日期',
+		        	formatter: function (value, row, index) {
+		        		if(row.createTime!=null&&(row.createTime).length>0){
+		        			return $.common.formatDate(value,"YYYY-mm-dd");
+		        		}else{
+		        			return "--";
+		        		}
+		        	}
+		        }]
+            };
+            $.table.init(options);
+        });
+        function removeall(){
+        	table.set();
+    		var rows = $.common.isEmpty(table.options.uniqueId) ? $.table.selectFirstColumns() : $.table.selectColumns(table.options.uniqueId);
+    		if (rows.length == 0) {
+    			$.modal.alertWarning("请至少选择一条记录");
+    			return;
+    		}
+    		if ($.table.selectColumns("groupName")!=null&&$.table.selectColumns("groupName")!="") {
+    			$.modal.alertWarning("您选中的数据中包含已绑定干系人组的数据，请先解绑");
+    			return;
+    		}
+    		if ($.table.selectColumns("num")!=null&&$.table.selectColumns("num")!="") {
+    			$.modal.alertWarning("您选中的数据中有下过单的床号不能删除");
+    			return;
+    		}
+    		$.modal.confirm("确认要删除选中的" + rows.length + "条数据吗?", function() {
+    			var url = table.options.removeUrl;
+    			var data = { "ids": rows.join() };
+    			$.operate.submit(url, "post", "json", data);
+    		});
+        }
+        function exportexcel(){
+			$('#checkBoxIds').val($.table.selectColumns("id"));
+			$.table.exportExcel();
+		}
+    </script>
+    
+    <!-- 导入区域 -->
+<script id="importCot" type="text/template">
+    <form enctype="multipart/form-data" class="mt20 mb10">
+        <div class="col-xs-offset-1">
+            <input type="file" id="file" name="file"/>
+            <div class="mt10 pt5">
+                <a onclick="$.table.importTemplate('business/cot/downloadTemplate')" class="btn btn-default btn-xs"><i class="fa fa-file-excel-o"></i> 下载陪护床导入模板(EXCEL)</a>
+            </div>
+            <font color="red" class="pull-left mt10">
+                提示：仅允许导入“xls”或“xlsx”格式文件！
+            </font>
+        </div>
+    </form>
+</script>
+</body>
+</html>

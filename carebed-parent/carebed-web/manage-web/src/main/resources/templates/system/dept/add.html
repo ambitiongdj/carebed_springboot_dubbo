@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('新增部门')" />
+	<th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+	<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+		<form class="form-horizontal m" id="form-dept-add">
+			<input id="treeId" name="parentId" type="hidden" th:value="${dept.deptId}"   />
+			<input id="addType" type="hidden" th:value="${addType}"   />
+			<div class="form-group">
+				<label class="col-sm-3 control-label">上级部门：</label>
+				<div class="col-sm-8">
+				    <div class="input-group">
+						<input class="form-control" type="text" id="treeName" readonly="true" th:value="${dept.deptName}">
+					    <span class="input-group-addon"><i class="fa fa-search"></i></span>
+				    </div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">上级部门机构编码：</label>
+				<div class="col-sm-8">
+					<span id="treeDeptCode" class="form-control" th:text="${dept.deptCode}"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label is-required">机构编码：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="deptCode" id="deptCode" maxlength="12" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label is-required">部门名称：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="deptName" id="deptName" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">城市：</label>
+				<div class="col-sm-8">
+					<input class="form-control" type="text" name="city" id="city" maxlength="16">
+				</div>
+			</div>
+			<!--<div class="form-group">
+				<label class="col-sm-3 control-label is-required">开业时间：</label>
+				<div class="col-sm-8">
+					<div class="input-group date" id="businessTimeDiv">
+						<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+						<input class="form-control" id="businessTime"  name="businessTime"   placeholder="yyyy-MM-dd" type="text" style="background-color:#ffffff" required readonly>
+					</div>
+				</div>
+			</div>-->
+			<div class="form-group">
+				<label class="col-sm-3 control-label">部门状态：</label>
+				<div class="col-sm-8">
+				    <div class="radio-box" th:each="dict : ${@dict.getType('sys_normal_disable')}">
+						<input type="radio" th:id="${dict.dictCode}" name="status" th:value="${dict.dictValue}" th:checked="${dict.default}">
+						<label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: datetimepicker-js" />
+	<script type="text/javascript">
+		var prefix = ctx + "system/dept";
+		var icon = "<i class='fa fa-times-circle'></i> ";
+		$("#form-dept-add").validate({
+			onkeyup: false,
+			rules:{
+				deptName:{
+					remote: {
+		                url: prefix + "/checkDeptNameUnique",
+		                type: "post",
+		                dataType: "json",
+		                data: {
+		                	"parentId": function() {
+		                		return $("input[name='parentId']").val();
+		                    },
+		                	"deptName" : function() {
+		                        return $.common.trim($("#deptName").val());
+		                    }
+		                },
+		                dataFilter: function(data, type) {
+		                	return $.validate.unique(data);
+		                }
+		            }
+				},
+				deptCode:{
+					remote: {
+		                url: prefix + "/checkDeptCodeUnique",
+		                type: "post",
+		                dataType: "json",
+		                data: {
+		                	"deptCode": function() {
+		                		return $("input[name='deptCode']").val();
+		                    },
+		                },
+		                dataFilter: function(data, type) {
+		                	return $.validate.unique(data);
+		                }
+		            }
+				},
+			},
+			messages: {
+				deptName: {
+		            remote: icon + "部门名称已经存在"
+		        },
+				deptCode: {
+		            remote: icon + "机构编码已经存在"
+		        },
+		    },
+		    focusCleanup: true
+		});
+		
+		function submitHandler() {
+	        if ($.validate.form()) {
+	        	$.operate.save(prefix + "/add", $('#form-dept-add').serialize());
+	        }
+	    }
+	
+		/*部门管理-新增-选择父部门树*/
+		function selectDeptTree() {
+			var options = {
+				title: '部门选择',
+				width: "380",
+				url: prefix + "/selectDeptTree/" + $("#treeId").val(),
+				callBack: doSubmit
+			};
+			$.modal.openOptions(options);
+		}
+		
+		function doSubmit(index, layero){
+			var body = layer.getChildFrame('body', index);
+   			$("#treeId").val(body.find('#treeId').val());
+   			$("#treeName").val(body.find('#treeName').val());
+   			$("#treeDeptCode").text(body.find('#treeDeptCode').val());
+   			layer.close(index);
+		}
+		/*部门管理-新增-选择父部门树*/
+
+		$(function () {
+			$('#businessTimeDiv').datetimepicker({
+				minView: "month",
+				format: 'yyyy-mm-dd',
+				endDate: new Date(),
+				autoclose: true
+			});
+			var addType = $("#addType").val();
+			if($.common.equals(addType,"all")){
+				$("#treeName").click(function(){
+					selectDeptTree();
+				});
+			}
+		});
+	</script>
+</body>
+</html>

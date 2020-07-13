@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.carebed.business.mapper.TCotMapper">
+    
+    <resultMap type="TCot" id="TCotResult">
+        <result property="id"    column="id"    />
+        <result property="cotNo"    column="cot_no"    />
+        <result property="memberName"    column="member_name"    />
+        <result property="stakeholderGroupId"    column="stakeholder_group_id"    />
+        <result property="status"    column="status"    />
+        <result property="delSta"    column="del_sta"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <resultMap type="TCotBindingVO" id="TCotBindingVOResult">
+        <result property="cotId"    column="cotId"    />
+        <result property="stakeholderGroupId"    column="stakeholder_group_id"    />
+        <result property="groupName"    column="group_name"    />
+        <result property="cotNo"    column="cot_no"    />
+        <result property="memberName"    column="member_name"    />
+        <result property="cotStatus"    column="cotStatus"    />
+        <result property="cotStatusName"    column="cotStatusName"    />
+        <result property="delSta"    column="del_sta"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectTCotVo">
+        select id, cot_no, member_name, stakeholder_group_id, status,del_sta, create_time, create_by,remark from t_cot
+    </sql>
+	<resultMap type="TCotVo" id="TCotVoResult">
+        <result property="id"    column="id"    />
+        <result property="cotNo"    column="cot_no"    />
+        <result property="memberName"    column="member_name"    />
+        <result property="stakeholderGroupId"    column="stakeholder_group_id"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="delSta"    column="del_sta"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="groupName"    column="group_name"    />
+         <result property="num"    column="num"    />
+    </resultMap>
+    <select id="selectTCotList" parameterType="TCotVo" resultMap="TCotVoResult">
+         select tc.id,tc.cot_no,tc.member_name,tc.stakeholder_group_id,tc.`status`,tc.create_time,tc.create_by,tsg.group_name,tod.num from t_cot tc LEFT JOIN t_stakeholder_group tsg on tc.stakeholder_group_id=tsg.id
+		left join (select count(1) num,cot_no from t_order group by cot_no) tod on tod.cot_no=tc.cot_no
+
+        <where>  
+        	and del_sta=1
+            <if test="cotNo != null  and cotNo != ''"> and tc.cot_no like concat('%', #{cotNo}, '%')</if>
+            <if test="memberName != null  and memberName != ''"> and tc.member_name like concat('%', #{memberName}, '%')</if>
+             <if test="groupName != null  and groupName != ''"> and tsg.group_name like concat('%', #{groupName}, '%')</if>
+            <if test="status != null  and status != ''"> and tc.status = #{status}</if>
+            <if test="checkBoxIds != null and checkBoxIds != ''">
+				AND tc.id in
+		 		<foreach item="cotId" collection="checkBoxIds.split(',')" open="(" separator="," close=")">
+	            	#{cotId}
+	        	</foreach>
+			</if>
+        </where>
+    </select>
+    
+    <select id="selectTCotById" parameterType="Long" resultMap="TCotResult">
+        <include refid="selectTCotVo"/>
+        where id = #{id}
+    </select>
+    <select id="selectTCotByCotNo" parameterType="String" resultMap="TCotResult">
+        <include refid="selectTCotVo"/>
+        where cot_no = #{cotNo}
+    </select>    
+        
+        
+    <select id="findTCotByCotNo" parameterType="TCot" resultMap="TCotResult">
+        <include refid="selectTCotVo"/>
+        <where>
+            <if test="cotNo != null  and cotNo != ''"> and cot_no = #{cotNo}</if>
+            <if test="memberName != null  and memberName != ''"> and member_name = #{memberName}</if>
+            <if test="stakeholderGroupId != null  and stakeholderGroupId != ''"> and stakeholder_group_id = #{stakeholderGroupId}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="delSta != null  and delSta != ''"> and del_sta = #{delSta}</if>
+        </where>
+    </select>
+
+    <insert id="insertTCot" parameterType="TCot">
+        insert into t_cot
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null ">id,</if>
+            <if test="cotNo != null  and cotNo != ''">cot_no,</if>
+            <if test="memberName != null  and memberName != ''">member_name,</if>
+            <if test="stakeholderGroupId != null ">stakeholder_group_id,</if>
+            <if test="status != null  and status != ''">status,</if>
+            <if test="delSta != null  and delSta != ''">del_sta,</if>
+             <if test="remark != null  and remark != ''">remark,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null ">#{id},</if>
+            <if test="cotNo != null  and cotNo != ''">#{cotNo},</if>
+            <if test="memberName != null  and memberName != ''">#{memberName},</if>
+            <if test="stakeholderGroupId != null ">#{stakeholderGroupId},</if>
+            <if test="status != null  and status != ''">#{status},</if>
+             <if test="delSta != null  and delSta != ''">#{delSta},</if>
+            <if test="remark != null  and remark != ''">#{remark},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTCot" parameterType="TCot">
+        update t_cot
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="cotNo != null  and cotNo != ''">cot_no = #{cotNo},</if>
+            <if test="memberName != null  and memberName != ''">member_name = #{memberName},</if>
+            <if test="stakeholderGroupId != null ">stakeholder_group_id = #{stakeholderGroupId},</if>
+            <if test="status != null  and status != ''">status = #{status},</if>
+            <if test="delSta != null  and delSta != ''">del_sta = #{delSta},</if>
+            <if test="remark != null  and remark != ''">remark = #{remark},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+     <delete id="deleteTCotById" parameterType="Long">
+        delete from t_cot where id = #{id}
+    </delete>
+
+    <delete id="deleteTCotByIds" parameterType="String">
+        delete from t_cot where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <update id="batchUnboundBySGIds" parameterType="String">
+        update t_cot set stakeholder_group_id = null where stakeholder_group_id in
+        <foreach item="sgid" collection="array" open="(" separator="," close=")">
+            #{sgid}
+        </foreach>
+    </update>
+
+    <select id="findBindingSGCotList" parameterType="TCot" resultMap="TCotBindingVOResult">
+        select
+            tc.id as cotId, tc.cot_no, tc.member_name,
+            tc.stakeholder_group_id, (select group_name from t_stakeholder_group where id = tc.stakeholder_group_id) as group_name,
+            tc.status as cotStatus, (select dict_label from sys_dict_data where dict_type = 'cot_status' and dict_value = tc.status) as cotStatusName,
+            tc.del_sta, tc.create_time, tc.create_by,tc.remark
+        from
+            t_cot tc
+        where
+            tc.stakeholder_group_id = #{params.sgId}
+        <if test="cotNo != null  and cotNo != ''"> and tc.cot_no like concat('%', #{cotNo}, '%')</if>
+        <if test="status != null  and status != ''"> and tc.status = #{status}</if>
+        <if test="checkBoxIds != null and checkBoxIds != ''">
+            AND tc.id in
+            <foreach item="cotId" collection="checkBoxIds.split(',')" open="(" separator="," close=")">
+                #{cotId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="findUnboundSGOfCotList" parameterType="TCot" resultMap="TCotBindingVOResult">
+        select
+            tc.id as cotId, tc.cot_no,
+            tc.status as cotStatus, (select dict_label from sys_dict_data where dict_type = 'cot_status' and dict_value = tc.status) as cotStatusName,
+            tc.del_sta, tc.create_time, tc.create_by,tc.remark
+        from
+            t_cot tc
+        where
+            tc.stakeholder_group_id is null
+        <if test="params.cotNoStart != null  and params.cotNoStart != ''"> and tc.cot_no &gt;=  #{params.cotNoStart}</if>
+        <if test="params.cotNoEnd != null  and params.cotNoEnd != ''"> and tc.cot_no &lt;=  #{params.cotNoEnd}</if>
+    </select>
+
+    <select id="findBindingSGByCotIds" parameterType="String" resultType="int">
+        select
+            count(id)
+        from t_cot
+        where
+            stakeholder_group_id is not null
+            and id in
+            <foreach item="cotId" collection="array" open="(" separator="," close=")">
+                #{cotId}
+            </foreach>
+    </select>
+
+    <update id="updateBatchSGOfCotRelationship" parameterType="map">
+        update t_cot set stakeholder_group_id = #{stakeholderGroupId} where id in
+        <foreach item="cotId" collection="cotIdArray" open="(" separator="," close=")">
+            #{cotId}
+        </foreach>
+    </update>
+
+    <update id="cancleCotBindingSGByCotId" parameterType="long">
+        update t_cot set stakeholder_group_id = null where id = #{cotId}
+    </update>
+
+    <update id="cancleCotBindingSGByCondition" parameterType="map">
+        update t_cot
+            set stakeholder_group_id = null
+        where
+            stakeholder_group_id = #{stakeholderGroupId} and
+            id in
+            <foreach item="cotId" collection="cotIdArray" open="(" separator="," close=")">
+                #{cotId}
+            </foreach>
+    </update>
+    
+      <insert id="insertBatchTCot" parameterType="java.util.List">
+        insert into t_cot
+            (cot_no, status, remark,create_time,create_by)
+        values
+        <foreach collection="readCotList" item="tCot" separator=",">
+            (
+                #{tCot.cotNo},#{tCot.status},#{tCot.remark},#{tCot.createTime} , #{tCot.createBy}
+            )
+        </foreach>
+    </insert>
+</mapper>

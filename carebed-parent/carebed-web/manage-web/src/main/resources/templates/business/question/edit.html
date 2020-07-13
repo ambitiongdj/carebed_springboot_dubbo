@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改问题')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-question-edit">
+            <input name="id" th:value="*{tQuestion.id}" type="hidden">
+            <input name="cotId" th:value="*{tCot.id}" type="hidden">
+            <h4 class="form-header h4">陪护床信息</h4>
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label is-required">陪护床编号：</label>
+                    <div class="col-sm-6">
+                        <input name="cotNo" th:value="*{tQuestion.cotNo}" class="form-control" readonly/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">干系组编号：</label>
+                    <div class="col-sm-6">
+                        <input name="stakeholderGroupId" th:value="*{tCot.stakeholderGroupId}" class="form-control" readonly/>
+                    </div>
+                </div>
+            </div>
+            <h4 class="form-header h4">问题反馈信息</h4>
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">联系方式：</label>
+                    <div class="col-sm-6">
+                        <input name="phone" th:value="*{tQuestion.phone}" class="form-control" readonly/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">陪护床位置：</label>
+                    <div class="col-sm-6">
+                        <input name="address" th:value="*{tQuestion.address}" class="form-control" readonly/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">问题意见：</label>
+                    <div class="col-sm-6">
+                        <textarea name="questionIdea" class="form-control" readonly>[[*{tQuestion.questionIdea}]]</textarea>
+                    </div>
+                </div>
+            </div>
+            <h4 class="form-header h4">处理结果</h4>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-5 control-label">处理状态：</label>
+                        <div class="col-sm-5">
+                            <input id="tQuestionStatus" th:value="*{tQuestion.status}" type="hidden">
+                            <select class="form-control minimumResultsForSearch" name="status" id="status" th:with="type=${@dict.getType('question_status')}">
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">陪护床状态：</label>
+                        <div class="col-sm-6">
+                            <input id="tCotStatus" th:value="*{tCot.status}" type="hidden">
+                            <select class="form-control minimumResultsForSearch" name="cotStatus" id="cotStatus" th:with="type=${@dict.getType('cot_status')}">
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">处理方案：</label>
+                    <div class="col-sm-6">
+                        <textarea name="handlePlan" class="form-control">[[*{tQuestion.handlePlan}]]</textarea>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-sm-offset-5 col-sm-10">
+        <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>保 存 </button>
+        <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭 </button>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script type="text/javascript">
+        var prefix = ctx + "business/question";
+        $("#form-question-edit").validate({
+            focusCleanup: true
+        });
+
+        //设置选中的状态
+        var tQuestionStatus = $("#tQuestionStatus").val();
+        var tCotStatus = $("#tCotStatus").val();
+        if($.common.isNotEmpty(tQuestionStatus)){
+            $("#status").val(tQuestionStatus).trigger("change");
+        }
+        if($.common.isNotEmpty(tCotStatus)){
+            $("#cotStatus").val(tCotStatus).trigger("change");
+        }
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-question-edit').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

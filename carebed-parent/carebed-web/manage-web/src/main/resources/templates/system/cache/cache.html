@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('缓存列表')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+	<div class="row">
+
+		<div class="btn-group-sm" id="toolbar" role="group">
+			<a class="btn btn-danger multiple disabled" onclick="$.operate.refreshSelect()" shiro:hasPermission="system:cache:refresh">
+				<i class="fa fa-remove"></i> 刷新缓存
+			</a>
+			<a class="btn btn-danger" onclick="clearCache()" shiro:hasPermission="system:cache:refresh">
+				<i class="fa fa-refresh"></i> 全部刷新
+			</a>
+		</div>
+
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table"></table>
+		</div>
+	</div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+	var editFlag = [[${@permission.hasPermi('system:cache:edit')}]];
+	var listFlag = [[${@permission.hasPermi('system:cache:list')}]];
+	var removeFlag = [[${@permission.hasPermi('system:cache:remove')}]];
+	var datas = [[${@dict.getType('sys_normal_disable')}]];
+	var prefix = ctx + "system/cache";
+
+	$(function() {
+		var options = {
+			url: prefix + "/list",
+			refreshUrl: prefix + "/refresh",
+			sortName: "createTime",
+			sortOrder: "desc",
+			modalName: "类型",
+			columns: [{
+				checkbox: true
+			},
+				{
+					field: 'dictValue',
+					title: '缓存键值'
+				},
+				{
+					field: 'dictLabel',
+					title: '缓存名称',
+					formatter: function(value, row, index) {
+						var listClass = $.common.equals("default", row.listClass) || $.common.isEmpty(row.listClass) ? "" : "badge badge-" + row.listClass;
+						return $.common.sprintf("<span class='%s'>%s</span>", listClass, value);
+					}
+				},
+				{
+					field: 'dictSort',
+					title: '字典排序'
+				},
+				{
+					field: 'createTime',
+					title: '创建时间',
+					sortable: true
+				},
+				{
+					title: '操作',
+					align: 'center',
+					formatter: function(value, row, index) {
+						var actions = [];
+						actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.refreshItem(\'' + row.dictValue + '\')"><i class="fa fa-remove"></i>刷新</a>');
+						return actions.join('');
+					}
+				}]
+		};
+		$.table.init(options);
+	});
+
+	/** 清理字典缓存 */
+	function clearCache() {
+		$.operate.get(prefix + "/refreshAll");
+	}
+</script>
+</body>
+</html>
