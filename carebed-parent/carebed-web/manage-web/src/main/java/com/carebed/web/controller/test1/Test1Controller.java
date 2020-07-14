@@ -22,6 +22,6 @@ public class Test1Controller {
         int asw = 0;
         int awq = 0;
         System.out.println(ab);
-        System.out.println("我也是在改变中……我改这一行解决冲突");
+        System.out.println("我也是在改变中……我改这一行解决冲突O(∩_∩)O哈哈~");
     }
 }
