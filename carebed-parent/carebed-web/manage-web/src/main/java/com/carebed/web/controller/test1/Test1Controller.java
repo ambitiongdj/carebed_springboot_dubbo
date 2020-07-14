@@ -22,6 +22,7 @@ public class Test1Controller {
         int asw = 0;
         int awq = 0;
         System.out.println(ab);
-        System.out.println("我也是在改变中……我改这一行测试冲突");
+        System.out.println("试试不同分支的代码冲突怎么解决呀");
+        System.out.println("我也是在改变中22……我改这一行测试冲突");
     }
 }
